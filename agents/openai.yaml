@@ -1,0 +1,4 @@
+interface:
+  display_name: "KarmenLoop Calendar Slots"
+  short_description: "Calendar Slots with reproducible local checks"
+  default_prompt: "Use $karmen-calendar-slots to find 30-minute meeting slots in this window across these busy calendars."

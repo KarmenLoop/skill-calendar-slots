@@ -1,0 +1,13 @@
+{
+  "window_start": "2026-10-19T09:00:00Z",
+  "window_end": "2026-10-19T12:00:00Z",
+  "duration_minutes": 30,
+  "step_minutes": 30,
+  "buffer_minutes": 0,
+  "busy": [
+    {
+      "start": "2026-10-19T10:00:00Z",
+      "end": "2026-10-19T11:00:00Z"
+    }
+  ]
+}
