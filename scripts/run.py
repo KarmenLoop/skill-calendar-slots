@@ -9,6 +9,8 @@ def process(data):
     duration=timedelta(minutes=integer(data["duration_minutes"],"duration_minutes",1))
     step=timedelta(minutes=integer(data.get("step_minutes",15),"step_minutes",1))
     buffer=timedelta(minutes=integer(data.get("buffer_minutes",0),"buffer_minutes"))
+    limit=integer(data.get("max_slots",1000),"max_slots",1)
+    if limit>1000: raise ValueError("max_slots exceeds 1000")
     intervals=[]
     for row in records(data,"busy"):
         left,right=instant(row["start"]),instant(row["end"])
@@ -25,7 +27,7 @@ def process(data):
     truncated=False
     while cursor+duration <= end:
         if not any(cursor<right and cursor+duration>left for left,right in merged):
-            if len(slots)==1000:
+            if len(slots)==limit:
                 truncated=True
                 break
             slots.append({"start":cursor.isoformat(),"end":(cursor+duration).isoformat()})
