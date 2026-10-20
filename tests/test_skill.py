@@ -68,5 +68,21 @@ class SkillTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             process(data)
 
+    def test_requested_slot_limit_reports_more_available_times(self):
+        data = dict(self.sample(), max_slots=2)
+        result = process(data)
+        self.assertEqual(len(result['slots']), 2)
+        self.assertTrue(result['truncated'])
+
+    def test_exact_slot_limit_is_not_truncated(self):
+        result = process(dict(self.sample(), max_slots=4))
+        self.assertEqual(len(result['slots']), 4)
+        self.assertFalse(result['truncated'])
+
+    def test_slot_limit_must_be_a_bounded_integer(self):
+        for value in [0, 1001, True, 1.5]:
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                process(dict(self.sample(), max_slots=value))
+
 if __name__ == "__main__":
     unittest.main()
