@@ -3,7 +3,7 @@ name: karmen-calendar-slots
 description: "Find meeting windows across busy calendars without booking anything. Use when a user wants shared availability or a conflict-free meeting slot."
 metadata:
   author: KarmenLoop
-  version: "0.2.0"
+  version: "0.2.1"
 ---
 
 # Calendar Slots

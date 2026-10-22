@@ -1,115 +1,60 @@
-# KarmenLoop Calendar Slots
+# Calendar Slots
 
-Calendar Slots finds meeting times from the busy intervals you give it. It accounts for meeting length, time zones, and the buffer each person needs.
+English | [简体中文](README.zh-CN.md)
 
-By [KarmenLoop](https://github.com/KarmenLoop).
+Find meeting-sized gaps in a set of busy intervals. Bring the calendars together yourself, choose the search window and buffer, and inspect the available slots in UTC.
 
-[![Release](https://img.shields.io/github/v/release/KarmenLoop/skill-calendar-slots)](https://github.com/KarmenLoop/skill-calendar-slots/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](docs/INPUT.md)
-[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](docs/COMPATIBILITY.md)
+[Download v0.2.1](https://github.com/KarmenLoop/skill-calendar-slots/releases/tag/v0.2.1) · [Tutorial](docs/tutorial.en.md) · [Input reference](docs/INPUT.md) · [Report an issue](https://github.com/KarmenLoop/skill-calendar-slots/issues)
 
-[Download](https://github.com/KarmenLoop/skill-calendar-slots/releases) · [Quick start](#quick-start) · [Documentation](#documentation) · [Contribute](CONTRIBUTING.md) · [Contact](https://github.com/KarmenLoop/skill-calendar-slots/issues)
+## What it does
 
-The code is [MIT licensed](LICENSE). The local helper needs Python 3.9 or later, with no subscription or provider API key.
+The 09:00–12:00 UTC window with 10:00–11:00 busy leaves four 30-minute slots. truncated is false.
 
-## Introduction
+There is no calendar account connection or booking action. Returned times describe only the intervals you supplied.
 
-Provide a scheduling window, a duration, and busy intervals with explicit UTC offsets. The helper merges overlaps, applies the buffers, and returns complete slots on a fixed UTC grid. It does not read calendars or book a meeting.
+![Calendar Slots sample JSON output from version 0.2.1](docs/images/example-output-v0.2.1.svg)
 
-The package includes an agent skill, a local Python helper, example data, and tests. The skill guides the conversation; the helper processes the supplied data.
+*Actual local output from v0.2.1, rendered as an image. [Complete result](examples/expected.json) · [Image provenance](docs/images/provenance.json).*
 
-## Capabilities
+## Start here
 
-- Merge overlapping busy intervals from several calendars.
-- Apply buffers and meeting duration.
-- Return bounded, reproducible UTC candidate slots.
-
-## Quick start
-
-Requirements: Python 3.9+. Git is needed only for cloning; downloading the release archive also works. On Windows, replace python3 with py -3 if that is your installed launcher.
+Download `karmen-calendar-slots-v0.2.1.zip` and its `.sha256` file from the release, verify the hash, then extract the ZIP. In the extracted directory, use Python 3.9 or later:
 
 ```sh
-git clone https://github.com/KarmenLoop/skill-calendar-slots.git
-cd skill-calendar-slots
-python3 scripts/run.py --input examples/input.json
-python3 -m unittest discover -s tests -v
-```
-
-Compare the result with [examples/expected.json](examples/expected.json). For your own data, follow the [input format](docs/INPUT.md). Relative file paths are resolved from the directory where you run the command.
-
-To save a result without overwriting an existing file:
-
-```sh
-python3 scripts/run.py --input examples/input.json --output result.json
-```
-
-### Use a pipeline
-
-Pass `--input -` to read the same JSON format from standard input:
-
-```sh
-cat examples/input.json | python3 scripts/run.py --input -
 python3 scripts/run.py --version
+python3 scripts/run.py --input examples/input.json
 ```
 
-On PowerShell, use `Get-Content -Raw examples/input.json | python scripts/run.py --input -`.
-The input limit and validation are the same for files and pipelines. Add `--output result.json` to save a new file.
+Expected version: `karmen-calendar-slots 0.2.1`. The 09:00–12:00 UTC window with 10:00–11:00 busy leaves four 30-minute slots. truncated is false.
 
-### Install the agent skill
-
-Install it for the agent host you use:
+To install the complete skill into a host that reads `~/.agents/skills`:
 
 ```sh
-python3 install.py --host codex
-# Alternatives: --host deepseek, --host grok, or --host agents
+python3 install.py --host agents
 ```
 
-The installer copies the skill into your host's skill directory. It stops if that directory already exists. To choose another location, pass `--destination` with a new directory. Host settings, credentials, permissions, and other skills are left alone.
+The installer refuses an existing destination. Host discovery and invocation vary; see the [full setup and practice guide](docs/tutorial.en.md). You can run the helper directly without an AI host.
 
-In Codex, invoke $karmen-calendar-slots. In Grok Build, invoke /karmen-calendar-slots. In another compatible host, select the installed skill by name. Example request:
+## Use it with your own work
 
-> Find a few times when everyone is free for a 30-minute meeting.
+Give every timestamp an explicit UTC offset. Use duration_minutes for meeting length, step_minutes for start spacing, and buffer_minutes around busy intervals.
 
-Refresh your host's skill discovery if needed. See [compatibility and its verification limits](docs/COMPATIBILITY.md).
+Combine two people’s busy intervals, add a 10-minute buffer, and compare the results. Use max_slots to limit output; a true truncated flag means more slots exist.
 
-## How it works
+Read the [field contract](docs/INPUT.md) before preparing a new input. The helper runs locally with the Python standard library; it needs no model account, API key, or network connection. An AI host has its own data and permission settings.
 
-Busy intervals are buffered, clipped, sorted, and merged. A fixed UTC grid yields only complete meetings that do not intersect the merged busy intervals.
+## Questions
 
-The result is JSON, so you can save it or pass it to another tool. Exit code `0` means the helper finished, even when its findings need attention. Exit code `2` means the input or a file operation failed. The helper does not run shell commands from the input or overwrite an existing output file.
+**Can it book Google Calendar or Outlook meetings?** No. Export the relevant busy intervals first. Booking and invitations require a separate authorized integration.
 
-## Documentation
+**Where does the result go?** JSON is printed to stdout unless you request a new file with `--output`. Existing output files are preserved. The helper reads only the submitted records and any local paths documented in its input contract.
 
-- [Agent instructions](SKILL.md): selection, workflow, and completion criteria.
-- [Input and output](docs/INPUT.md): fields and complete example.
-- [Compatibility](docs/COMPATIBILITY.md): installation targets and host limits.
-- [Validation](docs/VALIDATION.md): observed local results and acceptance scenarios.
-- [Sources](docs/SOURCES.md): public research references and design decisions.
-- [Changelog](CHANGELOG.md): release history.
+## Documentation and support
 
-## Limitations
-
-No recurring-event expansion or timezone-database conversion is included. Inputs must be concrete intervals with offsets. The helper does not reserve a slot.
-
-Examples are synthetic. Local tests establish the covered helper behavior; they do not establish an authenticated provider integration or the quality of every future model response. Tools and account access remain those of the host.
-
-## Contributing
-
-Bug reports, focused improvements, documentation fixes, and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), include a sanitized reproduction, and run the tests. Development needs no third-party runtime dependency.
-
-## Support
-
-Use [GitHub Issues](https://github.com/KarmenLoop/skill-calendar-slots/issues) for bugs and feature requests. [SUPPORT.md](SUPPORT.md) explains what to include. Never attach keys, customer records, or private conversations.
+- [Download, install, configure, practice, upgrade, and remove](docs/tutorial.en.md)
+- [Input/output contract](docs/INPUT.md) and [compatibility](docs/COMPATIBILITY.md)
+- [Changelog](CHANGELOG.md), [contributing](CONTRIBUTING.md), [support](SUPPORT.md), and [security reports](SECURITY.md)
 
 ## License
 
-Copyright © 2026 KarmenLoop. [MIT](LICENSE) permits commercial use and secondary development under its terms. Third-party services retain their own terms; see [NOTICE.md](NOTICE.md).
-
-## Acknowledgements
-
-This is an independent KarmenLoop implementation. [Research notes](docs/SOURCES.md) identify public design references from the Meta, DeepSeek, and xAI ecosystems as applicable. No upstream code or brand assets are bundled, and no affiliation or endorsement is claimed.
-
-## Contact
-
-[KarmenLoop](https://github.com/KarmenLoop) · [Issues](https://github.com/KarmenLoop/skill-calendar-slots/issues) · [Security reporting](SECURITY.md)
+[MIT](LICENSE). Keep the license and [notice](NOTICE.md) with redistributed copies. Maintained by [KarmenLoop](https://karmenloop.com).
